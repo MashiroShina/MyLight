@@ -21,12 +21,15 @@ Shader "Unlit/Lights"
 		  "LightMode" = "ForwardBase"
 		}
 		CGPROGRAM
+		#pragma target 3.0
+
 		#pragma vertex MyVertexProgram
 		#pragma fragment MyFragmentProgram
 
 		 #include "UnityCG.cginc"
 		 #include "UnityStandardBRDF.cginc"
 		 #include "UnityStandardUtils.cginc"
+	
 
 		float4 _Tint;
 		sampler2D _MainTex;
@@ -63,6 +66,8 @@ Shader "Unlit/Lights"
 
 		float4 MyFragmentProgram(Interpolators i):SV_TARGET
 		{
+
+
 		i.normal=normalize(i.normal);
 		
 		float3 viewDir=normalize(_WorldSpaceCameraPos-i.worldPos);
@@ -70,6 +75,7 @@ Shader "Unlit/Lights"
 		float3 lightColor = _LightColor0.rgb;
 		float3 albedo = tex2D(_MainTex, i.uv).rgb * _Tint.rgb;	
 
+	
 		//=================================================Metallic Workflow
 		float3 specularTint; // = albedo * _Metallic;
 		float oneMinusReflectivity; // = 1 - _Metallic;
