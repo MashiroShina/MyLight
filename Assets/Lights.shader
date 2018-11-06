@@ -93,14 +93,14 @@ Shader "Unlit/Lights"
 		return float4(diffuse+specular,1);
 		//=================================================
 
+		//DotClamped(float3(0,1,0),i.normal)==max(0, dot(float3(0,1,0),i.normal));
+
 		//=================================================albedo Utility Function ,use DiffuseANDSpecular open this
 		//float oneMinusReflectivity;
 		//		albedo = EnergyConservationBetweenDiffuseAndSpecular(
 		//			albedo, _SpecularTint.rgb, oneMinusReflectivity
 		//		);//albedo*=1-	max(_SpecularTint.r, max(_SpecularTint.g, _SpecularTint.b)); //== oneMinusReflectivity
 		//=================================================
-		
-		//DotClamped(float3(0,1,0),i.normal)==max(0, dot(float3(0,1,0),i.normal));
 
 		//=================================================diffuse
 		//float3 diffuse=albedo*lightColor*DotClamped(lightDir, i.normal);
