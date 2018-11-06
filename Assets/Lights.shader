@@ -11,6 +11,7 @@ Shader "Unlit/Lights"
 	Properties {
 	_Tint ("Tint", Color) = (1, 1, 1, 1)
 	_MainTex("Texture",2D)="white"{}
+	_SpecularTint ("Specular", Color) = (0.5, 0.5, 0.5)
 	_Smoothness ("Smoothness", Range(0, 1)) = 0.5
 	}
 	SubShader{
@@ -29,6 +30,7 @@ Shader "Unlit/Lights"
 		sampler2D _MainTex;
 		float4 _MainTex_ST;
 		float _Smoothness;
+		float4 _SpecularTint;
 
 		struct VertexData {
 		float4 position : POSITION;
@@ -59,27 +61,53 @@ Shader "Unlit/Lights"
 		float4 MyFragmentProgram(Interpolators i):SV_TARGET
 		{
 		i.normal=normalize(i.normal);
-		float3 lightDir=_WorldSpaceLightPos0.xyz;
+		
 		float3 viewDir=normalize(_WorldSpaceCameraPos-i.worldPos);
-
+		float3 lightDir=_WorldSpaceLightPos0.xyz;
 		float3 lightColor = _LightColor0.rgb;
 		float3 albedo = tex2D(_MainTex, i.uv).rgb * _Tint.rgb;
-		float3 diffuse=albedo*lightColor*DotClamped(lightDir, i.normal);
-		
+		//DotClamped(float3(0,1,0),i.normal)==max(0, dot(float3(0,1,0),i.normal));
 
-
-		
-		//=================================================reflect
-		float3 reflectionDir = reflect(-lightDir, i.normal);
-		//return float4(reflectionDir * 0.5 + 0.5, 1); //debug reflect to NORMAL //reflect= 2*dot(n,l);
-		//return DotClamped(viewDir, reflectionDir);
+		//=================================================diffuse
+		//float3 diffuse=albedo*lightColor*DotClamped(lightDir, i.normal);
+		//return float4(diffuse + specular, 1);
 		//=================================================
-		return pow(
-					DotClamped(viewDir, reflectionDir),
+
+		//=================================================reflect
+		//float3 reflectionDir = reflect(-lightDir, i.normal);
+		//return float4(reflectionDir * 0.5 + 0.5, 1); //debug reflect to NORMAL //reflect= 2*dot(n,l);
+		//return DotClamped(viewDir, reflectionDir); 
+		//=================================================
+		
+		//=================================================Blinn-Phong
+		//float3 halfVector = normalize(lightDir + viewDir);
+		//return pow(
+		//			DotClamped(halfVector, i.normal),
+		//			_Smoothness * 100
+		//);// x^y x=DotClamped(viewDir, reflectionDir) , y=_Smoothness * 100
+		//=================================================
+
+		//=================================================specular
+		//float3 halfVector = normalize(lightDir + viewDir);
+		//float3 specular = _SpecularTint.rgb *lightColor * pow(
+		//			DotClamped(halfVector, i.normal),
+		//			_Smoothness * 100
+		//);
+		//return float4(specular, 1);
+		//=================================================
+
+		//=================================================diffuse+specular
+		float3 halfVector = normalize(lightDir + viewDir);
+		float3 diffuse=albedo*lightColor*DotClamped(lightDir, i.normal);
+		float3 specular = _SpecularTint.rgb *lightColor * pow(
+					DotClamped(halfVector, i.normal),
 					_Smoothness * 100
-		);// x^y x=DotClamped(viewDir, reflectionDir) , y=_Smoothness * 100
-		return float4(diffuse,1);
-		//return max(0, dot(float3(0,1,0),i.normal));
+		);
+		return float4(diffuse + specular, 1);
+		//=================================================
+
+
+
 		}
 		
 		ENDCG
